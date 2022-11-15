@@ -13,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -52,8 +54,12 @@ public class FinalTestDataAccess {
         String coursePhoto = jdbcTemplate.queryForObject("select coursePhoto from course where courseId=(select courseId from chapterProgress where testId=" + userAnswers.getTestId() + ")", String.class);
         String description = "Completed course" + " - " +jdbcTemplate.queryForObject("select courseName from course where courseId=(select courseId from chapter where chapterId=(select chapterId from chapterProgress where testId=" + userAnswers.getTestId() + "))", String.class);
         String description1 = "You Scored " + jdbcTemplate.queryForObject("select chapterTestPercentage from chapterProgress where chapterId=(select chapterId from chapterProgress where testId=" + userAnswers.getTestId() + ")", String.class) + "% in course " + jdbcTemplate.queryForObject("select courseName from course where courseId=(select courseId from chapter where chapterId=(select chapterId from chapterProgress where testId=" + userAnswers.getTestId() + "))", String.class);
-        jdbcTemplate.update("insert into notification(userName,description,notificationUrl) values(?,?,?)",userName,description,coursePhoto);
-        jdbcTemplate.update("insert into notification(userName,description,notificationUrl) values(?,?,?)",userName,description1,coursePhoto);
+        //        String photoUrl = String.format(DOWNLOAD_URL, URLEncoder.encode("password_change_success.png"));
+        LocalDateTime dateTime = LocalDateTime.now();
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        String formatDateTime = dateTime.format(format);
+        jdbcTemplate.update("insert into notification(userName,description,timeStamp,notificationUrl) values(?,?,?,?)",userName,description,formatDateTime,coursePhoto);
+        jdbcTemplate.update("insert into notification(userName,description,timeStamp,notificationUrl) values(?,?,?,?)",userName,description1,formatDateTime,coursePhoto);
                                 /* Done */
         jdbcTemplate.update("update courseProgress set coursePercentage=" + coursePercentage + ",courseCompletedStatus=true where courseId=" + courseId);
         LocalDate courseCompletedDate = LocalDate.now();

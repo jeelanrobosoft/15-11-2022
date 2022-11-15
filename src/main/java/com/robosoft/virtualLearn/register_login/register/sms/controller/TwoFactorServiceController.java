@@ -1,6 +1,7 @@
 package com.robosoft.virtualLearn.register_login.register.sms.controller;
 
 
+import com.google.api.Http;
 import com.robosoft.virtualLearn.register_login.register.sms.model.MobileAuth;
 import com.robosoft.virtualLearn.register_login.register.sms.service.SmsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,26 +22,25 @@ public class TwoFactorServiceController {
 
 
     @PutMapping("/Continue")
-    public String sendCodeInSMS(@RequestBody MobileAuth mobileAuth) {
+    public ResponseEntity<String> sendCodeInSMS(@RequestBody MobileAuth mobileAuth) {
         int status = service.checkMobileNumber(mobileAuth);
         if (status == 1)
-            return "User already exists";
+            return new ResponseEntity<>("User already exists", HttpStatus.NOT_FOUND);
         String twoFaCode = String.valueOf(new Random().nextInt(8999) + 1000);
-        return "OTP Valid Until = " + service.sendOtp(mobileAuth, twoFaCode) + " Minutes";
-
+        return ResponseEntity.of(Optional.of("OTP Valid Until = " + service.sendOtp(mobileAuth, twoFaCode) + " Minutes"));
     }
 
 
     @PutMapping("/Resend")
-    public String ResendCodeInSMS(@RequestBody MobileAuth mobileAuth) {
+    public ResponseEntity<String> ResendCodeInSMS(@RequestBody MobileAuth mobileAuth) {
         service.deletePreviousOtp(mobileAuth.getMobileNumber());
         String twoFaCode = String.valueOf(new Random().nextInt(8999) + 1000);
-        return "OTP Valid Until = " + service.sendOtp(mobileAuth, twoFaCode) + " Minutes";
+        return ResponseEntity.of(Optional.of("OTP Valid Until = " + service.sendOtp(mobileAuth, twoFaCode) + " Minutes"));
     }
 
     @PostMapping("/Verify")
-    public String verifyOtp(@RequestBody MobileAuth otp) {
-        return service.verifyOtp(otp);
+    public ResponseEntity<String> verifyOtp(@RequestBody MobileAuth otp) {
+        return new ResponseEntity<>(service.verifyOtp(otp),HttpStatus.OK);
     }
 
     @PostMapping("/Send")

@@ -6,8 +6,13 @@ import com.robosoft.virtualLearn.register_login.register.sms.model.OtpVerificati
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.net.URLEncoder;
+
+import static com.robosoft.virtualLearn.profile.constants.Constants.DOWNLOAD_URL;
 
 @Service
 public class DataAccessService {
@@ -49,5 +54,6 @@ public class DataAccessService {
     public void resetPassword(MobileAuth auth) {
         String query = "update authenticate set password=? where userName=(select userName from user where mobileNumber='" + auth.getMobileNumber() + "')";
         jdbcTemplate.update(query,new BCryptPasswordEncoder().encode(auth.getOneTimePassword()));
+
     }
 }
