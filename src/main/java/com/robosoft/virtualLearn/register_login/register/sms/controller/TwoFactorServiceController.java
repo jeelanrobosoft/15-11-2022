@@ -9,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
@@ -24,13 +22,12 @@ public class TwoFactorServiceController {
 
 
     @PutMapping("/Continue")
-    public ResponseEntity<Map> sendCodeInSMS(@RequestBody MobileAuth mobileAuth) {
+    public ResponseEntity<String> sendCodeInSMS(@RequestBody MobileAuth mobileAuth) {
         int status = service.checkMobileNumber(mobileAuth);
         if (status == 1)
-            return ResponseEntity.of(Optional.of(Collections.singletonMap("User already exist",HttpStatus.NOT_FOUND)));
+            return new ResponseEntity<>("User already exists", HttpStatus.NOT_FOUND);
         String twoFaCode = String.valueOf(new Random().nextInt(8999) + 1000);
-       return ResponseEntity.of(Optional.of(Collections.singletonMap("OTP Valid Until (Mins)",service.sendOtp(mobileAuth, twoFaCode))));
-//        return ResponseEntity.of(Optional.of("OTP Valid Until = " + service.sendOtp(mobileAuth, twoFaCode) + " Minutes"));
+        return ResponseEntity.of(Optional.of("OTP Valid Until = " + service.sendOtp(mobileAuth, twoFaCode) + " Minutes"));
     }
 
 
@@ -42,9 +39,8 @@ public class TwoFactorServiceController {
     }
 
     @PostMapping("/Verify")
-    public ResponseEntity<Map> verifyOtp(@RequestBody MobileAuth otp) {
-//        return new ResponseEntity<>(service.verifyOtp(otp),HttpStatus.OK);
-        return ResponseEntity.of(Optional.of(Collections.singletonMap("Status",service.verifyOtp(otp))));
+    public ResponseEntity<String> verifyOtp(@RequestBody MobileAuth otp) {
+        return new ResponseEntity<>(service.verifyOtp(otp),HttpStatus.OK);
     }
 
     @PostMapping("/Send")
